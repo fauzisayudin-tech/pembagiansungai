@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Interaktif Pembagian Wilayah Sungai</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f9ff;
+        }
+
+        .river-section {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .river-section:hover {
+            filter: brightness(1.1);
+            transform: translateY(-2px);
+        }
+
+        .active-section {
+            stroke: #fbbf24;
+            stroke-width: 3px;
+        }
+
+        .card-enter {
+            animation: slideUp 0.4s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .water-flow {
+            stroke-dasharray: 10;
+            animation: flow 2s linear infinite;
+        }
+
+        @keyframes flow {
+            from { stroke-dashoffset: 20; }
+            to { stroke-dashoffset: 0; }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="max-w-5xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
+        <!-- Header -->
+        <div class="bg-blue-600 p-6 text-white text-center">
+            <h1 class="text-3xl font-bold">Zonasi Ekosistem Sungai</h1>
+            <p class="mt-2 opacity-90">Pelajari karakteristik Hulu, Tengah, dan Hilir melalui media interaktif ini.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-0">
+            <!-- Visual Interaction Area -->
+            <div class="lg:col-span-2 p-6 bg-blue-50 border-r border-blue-100">
+                <div class="relative bg-white rounded-xl p-4 shadow-inner border border-blue-200">
+                    <h3 class="text-center text-sm font-semibold text-blue-500 mb-4 uppercase tracking-wider">Klik pada bagian sungai untuk melihat detail</h3>
+                    
+                    <svg viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto">
+                        <!-- Background Sky & Mountains -->
+                        <path d="M0 150 L150 50 L300 150 L450 80 L600 150 L800 150 L800 400 L0 400 Z" fill="#e2e8f0" />
+                        
+                        <!-- Hulu Section -->
+                        <g id="hulu-trigger" class="river-section" onclick="showDetail('hulu')">
+                            <path d="M150 50 L200 180 L100 180 Z" fill="#94a3b8" /> <!-- Mountain peak -->
+                            <path d="M150 50 L170 120 L130 120 Z" fill="#ffffff" opacity="0.8" /> <!-- Snow/Cloud -->
+                            <path id="path-hulu" d="M150 60 Q160 120 180 180" fill="none" stroke="#3b82f6" stroke-width="8" stroke-linecap="round" class="water-flow" />
+                            <text x="80" y="100" font-weight="bold" fill="#1e3a8a">HULU</text>
+                        </g>
+
+                        <!-- Tengah Section -->
+                        <g id="tengah-trigger" class="river-section" onclick="showDetail('tengah')">
+                            <path d="M180 180 Q250 250 450 220 T600 280" fill="none" stroke="#2563eb" stroke-width="15" stroke-linecap="round" class="water-flow" />
+                            <circle cx="350" cy="220" r="40" fill="#22c55e" opacity="0.2" />
+                            <text x="350" y="270" font-weight="bold" fill="#1e3a8a">TENGAH</text>
+                        </g>
+
+                        <!-- Hilir Section -->
+                        <g id="hilir-trigger" class="river-section" onclick="showDetail('hilir')">
+                            <path d="M600 280 Q700 320 800 300" fill="none" stroke="#1d4ed8" stroke-width="25" stroke-linecap="round" class="water-flow" />
+                            <path d="M700 280 L800 250 L800 350 L700 350 Z" fill="#1e40af" opacity="0.1" /> <!-- Ocean start -->
+                            <text x="680" y="350" font-weight="bold" fill="#1e3a8a">HILIR</text>
+                        </g>
+
+                        <!-- Decor -->
+                        <rect x="0" y="380" width="800" height="20" fill="#cbd5e1" />
+                    </svg>
+                </div>
+
+                <!-- Quiz Toggle -->
+                <div class="mt-6 flex justify-center">
+                    <button onclick="toggleQuiz()" class="bg-amber-500 hover:bg-amber-600 text-white px-6 py-2 rounded-full font-bold transition shadow-lg">
+                        Uji Pemahaman (Kuis)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Information Panel -->
+            <div class="p-6 bg-white overflow-y-auto" id="info-panel">
+                <div id="welcome-msg" class="text-center py-10">
+                    <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <h2 class="text-xl font-bold text-gray-800">Pilih Wilayah</h2>
+                    <p class="text-gray-500 mt-2">Klik pada peta di samping untuk melihat karakteristik spesifik setiap zona sungai.</p>
+                </div>
+
+                <div id="detail-content" class="hidden card-enter">
+                    <h2 id="detail-title" class="text-2xl font-bold text-blue-800 border-b-2 border-blue-100 pb-2 mb-4">Hulu</h2>
+                    
+                    <div class="space-y-4">
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-blue-700 text-sm uppercase">Karakteristik Fisik</h4>
+                            <ul id="list-fisik" class="list-disc ml-4 mt-2 text-gray-700 text-sm space-y-1"></ul>
+                        </div>
+
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-green-700 text-sm uppercase">Proses Dominan</h4>
+                            <p id="proses-text" class="mt-2 text-gray-700 text-sm"></p>
+                        </div>
+
+                        <div class="bg-amber-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-amber-700 text-sm uppercase">Bentuk Lembah</h4>
+                            <p id="lembah-text" class="mt-2 text-gray-700 text-sm"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quiz Content -->
+                <div id="quiz-content" class="hidden card-enter">
+                    <h2 class="text-2xl font-bold text-amber-800 border-b-2 border-amber-100 pb-2 mb-4">Kuis Singkat</h2>
+                    <div id="quiz-body">
+                        <p id="question" class="font-semibold text-gray-800 mb-4"></p>
+                        <div id="options" class="space-y-2"></div>
+                    </div>
+                    <div id="quiz-result" class="hidden mt-4 p-4 rounded-lg text-center font-bold"></div>
+                    <button onclick="nextQuestion()" id="next-btn" class="hidden mt-4 w-full bg-blue-600 text-white py-2 rounded-lg">Pertanyaan Berikutnya</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const data = {
+            hulu: {
+                title: "Wilayah Hulu (Upper Course)",
+                fisik: [
+                    "Arus air sangat deras",
+                    "Saluran sempit dan dangkal",
+                    "Banyak terdapat jeram/air terjun",
+                    "Air jernih dan suhu dingin",
+                    "Batu-batu besar dan tajam"
+                ],
+                proses: "Erosi vertikal sangat dominan, mengakibatkan pendalaman sungai.",
+                lembah: "Berbentuk huruf 'V' karena erosi ke bawah yang kuat."
+            },
+            tengah: {
+                title: "Wilayah Tengah (Middle Course)",
+                fisik: [
+                    "Arus mulai melambat",
+                    "Saluran lebih lebar dan dalam",
+                    "Mulai terbentuk meander (kelokan)",
+                    "Material sedimen berukuran sedang",
+                    "Suhu air lebih hangat"
+                ],
+                proses: "Keseimbangan antara erosi (lateral) dan transportasi material.",
+                lembah: "Berbentuk huruf 'U' dengan dasar yang mulai mendatar."
+            },
+            hilir: {
+                title: "Wilayah Hilir (Lower Course)",
+                fisik: [
+                    "Arus sangat tenang/lambat",
+                    "Saluran sangat lebar dan berkelok",
+                    "Banyak endapan lumpur (sedimen)",
+                    "Membentuk delta di muara",
+                    "Sering terjadi banjir alami"
+                ],
+                proses: "Sedimentasi (pengendapan) sangat dominan.",
+                lembah: "Sangat lebar dengan dataran banjir (floodplain) yang luas."
+            }
+        };
+
+        const quizData = [
+            {
+                q: "Di wilayah mana proses sedimentasi (pengendapan) paling dominan terjadi?",
+                a: ["Hulu", "Tengah", "Hilir"],
+                correct: 2
+            },
+            {
+                q: "Lembah sungai berbentuk huruf 'V' adalah ciri khas dari wilayah...",
+                a: ["Hulu", "Tengah", "Hilir"],
+                correct: 0
+            },
+            {
+                q: "Meander atau kelokan sungai yang ekstrem mulai banyak ditemukan di...",
+                a: ["Hulu", "Tengah", "Hilir"],
+                correct: 1
+            }
+        ];
+
+        let currentQuestion = 0;
+
+        function showDetail(section) {
+            document.getElementById('welcome-msg').classList.add('hidden');
+            document.getElementById('quiz-content').classList.add('hidden');
+            document.getElementById('detail-content').classList.remove('hidden');
+
+            const content = data[section];
+            document.getElementById('detail-title').innerText = content.title;
+            
+            const listFisik = document.getElementById('list-fisik');
+            listFisik.innerHTML = '';
+            content.fisik.forEach(item => {
+                const li = document.createElement('li');
+                li.innerText = item;
+                listFisik.appendChild(li);
+            });
+
+            document.getElementById('proses-text').innerText = content.proses;
+            document.getElementById('lembah-text').innerText = content.lembah;
+
+            // Highlight active visual
+            document.querySelectorAll('.river-section path').forEach(p => p.classList.remove('active-section'));
+            document.getElementById(`path-${section}`)?.classList.add('active-section');
+        }
+
+        function toggleQuiz() {
+            document.getElementById('welcome-msg').classList.add('hidden');
+            document.getElementById('detail-content').classList.add('hidden');
+            document.getElementById('quiz-content').classList.remove('hidden');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const q = quizData[currentQuestion];
+            document.getElementById('question').innerText = q.q;
+            const optionsDiv = document.getElementById('options');
+            optionsDiv.innerHTML = '';
+            document.getElementById('quiz-result').classList.add('hidden');
+            document.getElementById('next-btn').classList.add('hidden');
+
+            q.a.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-3 border rounded-lg hover:bg-blue-50 transition";
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(index);
+                optionsDiv.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(idx) {
+            const resultDiv = document.getElementById('quiz-result');
+            resultDiv.classList.remove('hidden');
+            if (idx === quizData[currentQuestion].correct) {
+                resultDiv.innerText = "Benar! Bagus sekali.";
+                resultDiv.className = "mt-4 p-4 rounded-lg text-center font-bold bg-green-100 text-green-700";
+            } else {
+                resultDiv.innerText = "Kurang tepat. Coba lagi atau baca materi lagi.";
+                resultDiv.className = "mt-4 p-4 rounded-lg text-center font-bold bg-red-100 text-red-700";
+            }
+            document.getElementById('next-btn').classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            currentQuestion = (currentQuestion + 1) % quizData.length;
+            loadQuestion();
+        }
+    </script>
+</body>
+</html>
